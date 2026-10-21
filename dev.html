@@ -550,7 +550,7 @@ function openUser(id){
     ${flagged ? `<div class="flagwarn">${icWarnSm}<span>فيه رسالة بمحادثات هالمستخدم تحتوي كلمات مرتبطة بضيق نفسي أو خطر على النفس. راجعها بعين الاعتبار والحساسية.</span></div>` : ''}
     <div class="row" style="margin-bottom:16px">
       <button class="btn small ${u.blocked ? 'ok2' : 'danger'}" id="blockBtn">${u.blocked ? 'إلغاء الحظر' : 'حظر الحساب'}</button>
-      <button class="btn small danger" id="delBtn">حذف كل بيانات المستخدم</button>
+      <button class="btn small danger" id="delBtn">مسح بيانات المستخدم</button>
       <span class="badge ok">جلسات: ${s.sessions||0}</span>
       <span class="badge ok">تثبيتات: ${s.installs||0}</span>
       <span class="badge ok">أُنشئت: ${s.chatsCreated||0}</span>
@@ -615,8 +615,8 @@ function openUser(id){
     catch(e){ toast('ما قدرت أحدّث الحساب'); }
   };
   $('delBtn').onclick = async () => {
-    if (!confirm('متأكد تبي تمسح كل بيانات هالمستخدم نهائياً؟ ما ترجع بعدها.')) return;
-    try { await deleteDoc(doc(db, 'users', u.id)); ALL_USERS = ALL_USERS.filter(x => x.id !== u.id); toast('انمسحت بيانات المستخدم'); $('overlay').classList.remove('on'); renderList(); renderStats(ALL_USERS); renderChart(ALL_USERS); }
+    if (!confirm('متأكد تبي تمسح بيانات هالمستخدم؟ تنمسح المحادثات والذاكرة والملف الشخصي من السحابة، ومن جواله لما يفتح التطبيق وهو متصل بالإنترنت. الحساب نفسه يبقى.')) return;
+    try { const t = Date.now(); await updateDoc(doc(db, 'users', u.id), {wipe: t, chats: [], prof: {}, stats: {}, updatedAt: t}); Object.assign(u, {wipe: t, chats: [], prof: {}, stats: {}}); toast('انمسحت بياناته من السحابة، وتنمسح من جواله لما يفتح التطبيق'); openUser(id); renderList(); renderStats(ALL_USERS); renderChart(ALL_USERS); }
     catch(e){ toast('ما قدرت أمسح البيانات'); }
   };
 
